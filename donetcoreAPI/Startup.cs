@@ -15,6 +15,8 @@ using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using NServiceBus;
+using Serilog;
+using Serilog.Core;
 
 namespace donetcoreAPI
 {
@@ -44,11 +46,21 @@ namespace donetcoreAPI
             endpointConfiguration.UseTransport<LearningTransport>();
             var endpointInstance =  Endpoint.Start(endpointConfiguration).ConfigureAwait(false);
             services.AddSingleton(endpointInstance.GetAwaiter().GetResult());
+
+            // add seq logging 
+
+            Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.ControlledBy(new LoggingLevelSwitch {MinimumLevel= Serilog.Events.LogEventLevel.Verbose})
+            .WriteTo.Seq(Configuration.GetSection("Seq:ServerUrl").Value,
+                         apiKey: Configuration.GetSection("Seq:ApiKey").Value
+                         )
+            .MinimumLevel.Verbose()
+            .CreateLogger();
         }
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env,ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {

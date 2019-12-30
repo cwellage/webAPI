@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using DataLayer;
 using Microsoft.AspNetCore.Mvc;
+using NServiceBus;
+using Serilog;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,11 +13,19 @@ namespace donetcoreAPI.Controllers
     [Route("api/[controller]")]
     public class DepartmentController : Controller
     {
+        MyDB database = new MyDB();
+        IEndpointInstance endpoint;
+
+        public DepartmentController(IEndpointInstance endpoint)
+        {
+            this.endpoint = endpoint; //nservice bus initializer
+        }
         // GET: api/<controller>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IEnumerable<Department> Get()
         {
-            return new string[] { "value1", "value2" };
+            Log.Information("IEnumerable<Department> Get()");
+            return database.Departments.Cast<Department>();
         }
 
         // GET api/<controller>/5
@@ -29,6 +39,7 @@ namespace donetcoreAPI.Controllers
         [HttpPost]
         public void Post([FromBody]string value)
         {
+            throw new NotImplementedException();
         }
 
         // PUT api/<controller>/5

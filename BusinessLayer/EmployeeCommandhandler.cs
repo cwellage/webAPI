@@ -7,6 +7,7 @@ using DataLayer;
 using System.Linq;
 using NServiceBus.Config;
 using System.Threading;
+using Serilog;
 
 namespace CommandLayer
 {
@@ -19,12 +20,22 @@ namespace CommandLayer
             return await Task.FromResult(emp).ConfigureAwait(false);
         }
 
-        public Task Handle(EmployeePostCommand message, IMessageHandlerContext context)
+        public async Task Handle(EmployeePostCommand message, IMessageHandlerContext context)
         {
-            Employee emp = new Employee { DepartmentId = message.DepartmentId, EmployeeName = message.EmployeeName };
-            database.Employees.Add(emp);
-            Thread.Sleep(10000);
-            return database.SaveChangesAsync();
+            try
+            {
+                Employee emp = new Employee { DepartmentId = message.DepartmentId, EmployeeName = message.EmployeeName };
+                database.Employees.Add(emp);
+                Thread.Sleep(10000);/// asume more processing is to be done
+                var task = await database.SaveChangesAsync();
+                Log.Information("Employee {emp} has been added", message.EmployeeName);
+                return;
+            }
+            catch (Exception e)
+            {
+                Log.Error("error in saving employee {emp} {exception }", message.EmployeeName, e.InnerException.Message);
+                return;
+            }         
         }
     }
 }
