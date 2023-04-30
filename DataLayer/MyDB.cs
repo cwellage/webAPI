@@ -23,7 +23,7 @@ namespace DataLayer
 
         protected override void OnConfiguring(DbContextOptionsBuilder builder)
         {
-            builder.UseSqlServer("Data Source = localhost; Initial Catalog = chatura; Integrated Security = True", providerOptions => providerOptions.CommandTimeout(60)).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            builder.UseSqlServer("Data Source = (localdb)\\MSSQLLocalDB; Initial Catalog = chatura; Integrated Security = True", providerOptions => providerOptions.CommandTimeout(60)).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }
     }
 }

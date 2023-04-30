@@ -1,0 +1,5 @@
+﻿open package manager console
+select data layer project 
+
+run add-migration [MigrationName]
+update-database

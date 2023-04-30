@@ -37,9 +37,11 @@ namespace donetcoreAPI.Controllers
 
         // POST api/<controller>
         [HttpPost]
-        public void Post([FromBody]string value)
+        public void Post([FromBody] Department value)
         {
-            throw new NotImplementedException();
+
+            database.Add(value);
+            database.SaveChanges();
         }
 
         // PUT api/<controller>/5
