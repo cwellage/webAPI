@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  donetcoreapi:
+    image: ${DOCKER_REGISTRY-}donetcoreapi
+    ports: 
+    - 5001:80
+    build:
+      context: .
+      dockerfile: donetcoreAPI\Dockerfile

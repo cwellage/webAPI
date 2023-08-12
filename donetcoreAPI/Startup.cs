@@ -17,6 +17,9 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 using NServiceBus;
 using Serilog;
 using Serilog.Core;
+using Microsoft.EntityFrameworkCore;
+using DataLayer;
+using System.Security.Cryptography.Xml;
 
 namespace donetcoreAPI
 {
@@ -44,10 +47,10 @@ namespace donetcoreAPI
             });
 
             EndpointConfiguration endpointConfiguration = new EndpointConfiguration("employee");
-            endpointConfiguration.UseTransport<LearningTransport>();
-            var endpointInstance =  Endpoint.Start(endpointConfiguration).ConfigureAwait(false);
+            endpointConfiguration.UseTransport<LearningTransport>().StorageDirectory("..\\.learningtransport"); ;
+            var endpointInstance = Endpoint.Start(endpointConfiguration).ConfigureAwait(false);
             services.AddSingleton(endpointInstance.GetAwaiter().GetResult());
-
+            services.AddSingleton(typeof(MyDB));
             // add seq logging 
 
             Log.Logger = new LoggerConfiguration()
@@ -66,13 +69,22 @@ namespace donetcoreAPI
             if (env.EnvironmentName== "Development")
             {
                 app.UseDeveloperExceptionPage();
+                using (var scope = app.ApplicationServices.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<MyDB>();
+                    dbContext.Database.EnsureCreated();
+                }
             }
             else
             {
+                using (var scope = app.ApplicationServices.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<MyDB>();
+                    dbContext.Database.EnsureCreated();
+                }
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
             app.UseMvc();
         // Enable middleware to serve generated Swagger as a JSON endpoint.
         app.UseSwagger();
